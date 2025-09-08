@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: legal-case-postgres
+    environment:
+      POSTGRES_DB: legal_case_management
+      POSTGRES_USER: legal_user
+      POSTGRES_PASSWORD: legal_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - legal-case-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: legal-case-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/legal_case_management
+      SPRING_DATASOURCE_USERNAME: legal_user
+      SPRING_DATASOURCE_PASSWORD: legal_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - legal-case-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: legal-case-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8080/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - legal-case-network
+
+volumes:
+  postgres_data:
+
+networks:
+  legal-case-network:
+    driver: bridge
