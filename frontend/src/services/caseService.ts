@@ -2,11 +2,14 @@ import { api } from '../utils/api';
 import { Case } from '../types';
 
 export const caseService = {
-    getCases: async (page = 0, size = 10, search = ''): Promise<{ content: Case[]; totalElements: number }> => {
-        const response = await api.get(`/cases?page=${page}&size=${size}&search=${search}`);
+    getCases: async (page = 0, size = 10): Promise<{ content: Case[]; totalElements: number }> => {
+        const response = await api.get(`/cases/getAll?page=${page}&size=${size}`);
         return response.data;
     },
-
+    searchCases: async (page = 0, size = 10, search = ''): Promise<{ content: Case[]; totalElements: number }> => {
+        const response = await api.get(`/cases/getAll?page=${page}&size=${size}&search=${search}`);
+        return response.data;
+    },
     getCaseById: async (id: string): Promise<Case> => {
         const response = await api.get(`/cases/${id}`);
         return response.data;

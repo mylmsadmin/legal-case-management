@@ -11,14 +11,15 @@ const CaseList: React.FC = () => {
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['cases', page, search, statusFilter],
-        queryFn: () => caseService.getCases(page, 10, search),
+        queryFn: () => caseService.getCases(page, 10),
         keepPreviousData: true,
     });
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setPage(0);
-    };
+    const handleSearch  = useQuery({
+        queryKey: ['cases', page, search, statusFilter],
+        queryFn: () => caseService.searchCases(page, 10, search),
+        keepPreviousData: true,
+    });
 
     if (isLoading) return <div className="flex justify-center p-8">Loading cases...</div>;
     if (error) return <div className="text-red-500 p-8">Error loading cases</div>;
