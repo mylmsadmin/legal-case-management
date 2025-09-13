@@ -1,0 +1,330 @@
+# application.yaml - Legal Automation Platform Configuration
+spring:
+  application:
+    name: legal-automation
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # Database Configuration
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/legal_automation_db}
+    username: ${DATABASE_USERNAME:legaldbadmin}
+    password: ${DATABASE_PASSWORD:legaladmin123}
+    driver-class-name: org.postgresql.Driver
+    
+    # Connection Pool Configuration (HikariCP)
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:20000}
+      idle-timeout: ${DB_IDLE_TIMEOUT:300000}
+      max-lifetime: ${DB_MAX_LIFETIME:1200000}
+      leak-detection-threshold: ${DB_LEAK_DETECTION:60000}
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:validate}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+    show-sql: ${SHOW_SQL:false}
+    defer-datasource-initialization: false
+
+  # File Upload Configuration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${MAX_FILE_SIZE:10MB}
+      max-request-size: ${MAX_REQUEST_SIZE:10MB}
+      file-size-threshold: 2KB
+
+  # Security Configuration
+  security:
+    require-ssl: ${REQUIRE_SSL:false}
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  
+  # Error handling
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: ${INCLUDE_STACKTRACE:never}
+    include-exception: false
+  
+  # Compression
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  
+  # HTTP/2 Support
+  http2:
+    enabled: true
+  
+  # SSL Configuration (for production)
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+    key-store: ${SSL_KEYSTORE:}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:}
+    key-store-type: ${SSL_KEYSTORE_TYPE:PKCS12}
+
+# Application-specific Configuration
+application:
+  security:
+    enabled: ${SECURITY_ENABLED:true}
+    jwt:
+      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      expiration: ${JWT_EXPIRATION:86400000} # 1 day
+      refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
+
+  file:
+    upload-dir: ${FILE_UPLOAD_DIR:./uploads/documents/}
+    allowed-extensions: ${ALLOWED_EXTENSIONS:pdf,doc,docx,txt,jpg,jpeg,png,xls,xlsx}
+    max-size: ${FILE_MAX_SIZE:10485760} # 10MB in bytes
+
+  rate-limiting:
+    enabled: ${RATE_LIMITING_ENABLED:true}
+    auth-requests-per-minute: ${AUTH_RATE_LIMIT:5}
+    general-requests-per-minute: ${GENERAL_RATE_LIMIT:60}
+    upload-requests-per-minute: ${UPLOAD_RATE_LIMIT:10}
+
+# Logging Configuration
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.legalfirm.automation: ${LOG_LEVEL_APP:INFO}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.hibernate.SQL: ${LOG_LEVEL_SQL:WARN}
+    org.hibernate.orm.jdbc.bind: ${LOG_LEVEL_SQL_PARAMS:WARN}
+  
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n"
+  
+  file:
+    name: ${LOG_FILE:logs/legal-automation.log}
+    max-size: ${LOG_FILE_MAX_SIZE:10MB}
+    max-history: ${LOG_FILE_MAX_HISTORY:30}
+
+# Management and Monitoring (Spring Boot Actuator)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_ENDPOINTS:health,info,metrics,prometheus}
+      base-path: /actuator
+  
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:when-authorized}
+      show-components: always
+    
+    metrics:
+      enabled: true
+  
+  metrics:
+    export:
+      prometheus:
+        enabled: ${PROMETHEUS_ENABLED:false}
+    web:
+      server:
+        auto-time-requests: true
+
+# Custom health indicators
+health:
+  database:
+    enabled: true
+  file-system:
+    enabled: true
+    path: ${application.file.upload-dir}
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/legal_automation_db
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+logging:
+  level:
+    com.legalfirm.automation: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+---
+# H2 Database Profile (for local development)
+spring:
+  config:
+    activate:
+      on-profile: h2
+
+  datasource:
+    url: jdbc:h2:mem:legaldb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+        trace: false
+
+  jpa:
+    database: H2
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+      platform: h2
+
+application:
+  security:
+    enabled: false
+  rate-limiting:
+    enabled: false
+
+logging:
+  level:
+    com.legalfirm.automation: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# Development with No Authentication Profile
+spring:
+  config:
+    activate:
+      on-profile: dev-no-auth
+
+  datasource:
+    url: jdbc:h2:mem:devdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+application:
+  security:
+    enabled: false
+  rate-limiting:
+    enabled: false
+
+logging:
+  level:
+    com.legalfirm.automation: DEBUG
+    org.springframework.security: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+---
+# Test Profile  
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+logging:
+  level:
+    com.legalfirm.automation: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+server:
+  ssl:
+    enabled: true
+
+application:
+  security:
+    enabled: true
+    jwt:
+      expiration: 3600000 # 1 hour for production
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: WARN
+    com.legalfirm.automation: INFO

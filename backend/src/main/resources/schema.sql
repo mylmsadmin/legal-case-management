@@ -1,0 +1,1 @@
+-- Schema creation handled by JPA

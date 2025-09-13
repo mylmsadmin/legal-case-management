@@ -1,0 +1,98 @@
+# application-local.yaml
+# Local Development Profile - NO AUTHENTICATION
+# WARNING: Only use for local development!
+
+# Database Configuration - PostgreSQL Development
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/legal_automation_db
+    driver-class-name: org.postgresql.Driver
+    username: legaldbadmin
+    password: legaladmin123
+
+    # Connection Pool Settings for Development
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+
+  # JPA Configuration - PostgreSQL Optimized
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 25
+
+  # Data Initialization
+  sql:
+    init:
+      mode: never
+      platform: postgresql
+
+  # Development file upload settings
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# Security Configuration - DISABLED
+application:
+  security:
+    enabled: false
+  rate-limiting:
+    enabled: false
+
+  # Development file storage
+  file:
+    upload-dir: ./uploads/dev/
+
+# Logging Configuration - Debug Mode
+logging:
+  level:
+    com.legalfirm.automation: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+
+# Development Features - Enable All Actuator Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+
+# Server Configuration
+server:
+  port: 8080
+
+  # Development error handling
+  error:
+    include-stacktrace: on_param
+    include-exception: true
+
+  # Enable compression for development testing
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+## Spring Boot DevTools (if dependency is present)
+#spring:
+#  devtools:
+#    restart:
+#      enabled: true
+#    livereload:
+#      enabled: true
