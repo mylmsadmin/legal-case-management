@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
     Scale,
     Users,
@@ -19,49 +21,78 @@ import {
     Briefcase,
     Gavel
 } from 'lucide-react';
+import { api } from '../../utils/api';
 
-const LegalCaseManagement = () => {
+const Dashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const stats = [
+    // Fetch dashboard statistics
+    const { data: stats, isLoading: statsLoading } = useQuery({
+        queryKey: ['dashboard-stats'],
+        queryFn: async () => {
+            const response = await api.get('/dashboard/stats');
+            return response.data;
+        },
+    });
+
+    // Fetch recent cases
+    const { data: recentCases, isLoading: casesLoading } = useQuery({
+        queryKey: ['recent-cases'],
+        queryFn: async () => {
+            const response = await api.get('/dashboard/recent-cases');
+            return response.data;
+        },
+    });
+
+    // Fetch upcoming hearings
+    const { data: upcomingHearings, isLoading: hearingsLoading } = useQuery({
+        queryKey: ['upcoming-hearings'],
+        queryFn: async () => {
+            const response = await api.get('/dashboard/upcoming-hearings');
+            return response.data;
+        },
+    });
+
+    // Default stats if loading or error
+    const dashboardStats = [
         {
             label: 'Total Cases',
-            value: '0',
+            value: statsLoading ? '...' : (stats?.totalCases || '0'),
             icon: FileText,
             color: 'bg-blue-500',
             trend: '+0%'
         },
         {
             label: 'Open Cases',
-            value: '0',
+            value: statsLoading ? '...' : (stats?.openCases || '0'),
             icon: AlertCircle,
             color: 'bg-orange-500',
             trend: '+0%'
         },
         {
             label: 'Pending Cases',
-            value: '0',
+            value: statsLoading ? '...' : (stats?.pendingCases || '0'),
             icon: Clock,
             color: 'bg-yellow-500',
             trend: '+0%'
         },
         {
             label: 'Closed Cases',
-            value: '0',
+            value: statsLoading ? '...' : (stats?.closedCases || '0'),
             icon: CheckCircle,
             color: 'bg-green-500',
             trend: '+0%'
         },
         {
             label: 'Upcoming Hearings',
-            value: '0',
+            value: hearingsLoading ? '...' : (stats?.upcomingHearings || '0'),
             icon: Calendar,
             color: 'bg-purple-500',
             trend: '+0%'
         },
         {
             label: 'Total Clients',
-            value: '0',
+            value: statsLoading ? '...' : (stats?.totalClients || '0'),
             icon: Users,
             color: 'bg-indigo-500',
             trend: '+0%'
@@ -76,17 +107,10 @@ const LegalCaseManagement = () => {
         { name: 'Messages', icon: MessageSquare, href: '/messages', current: false },
     ];
 
-    const recentCases = [
-        { id: 1, title: 'Smith vs. Johnson', status: 'Open', client: 'John Smith', date: '2024-01-15' },
-        { id: 2, title: 'Estate Planning - Williams', status: 'Pending', client: 'Sarah Williams', date: '2024-01-14' },
-        { id: 3, title: 'Contract Dispute - ABC Corp', status: 'Open', client: 'ABC Corporation', date: '2024-01-13' },
-    ];
-
-    const upcomingHearings = [
-        { id: 1, case: 'Smith vs. Johnson', date: '2024-01-20', time: '10:00 AM', court: 'District Court A' },
-        { id: 2, case: 'Estate Planning - Williams', date: '2024-01-22', time: '2:00 PM', court: 'Probate Court' },
-        { id: 3, case: 'Contract Dispute - ABC Corp', date: '2024-01-25', time: '9:30 AM', court: 'Commercial Court' },
-    ];
+    const handleLogout = () => {
+        localStorage.removeItem('jwt_token');
+        window.location.href = '/login';
+    };
 
     const Sidebar = () => (
         <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
@@ -105,9 +129,9 @@ const LegalCaseManagement = () => {
 
             <nav className="mt-8 px-4 space-y-2">
                 {navigationItems.map((item) => (
-                    <a
+                    <Link
                         key={item.name}
-                        href={item.href}
+                        to={item.href}
                         className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                             item.current
                                 ? 'bg-blue-600 text-white'
@@ -116,7 +140,7 @@ const LegalCaseManagement = () => {
                     >
                         <item.icon className="mr-3 h-5 w-5" />
                         {item.name}
-                    </a>
+                    </Link>
                 ))}
             </nav>
 
@@ -127,8 +151,8 @@ const LegalCaseManagement = () => {
                             <User className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">John Doe</p>
-                            <p className="text-xs text-gray-400 truncate">Senior Lawyer</p>
+                            <p className="text-sm font-medium text-white truncate">Legal User</p>
+                            <p className="text-xs text-gray-400 truncate">System User</p>
                         </div>
                     </div>
                 </div>
@@ -162,7 +186,10 @@ const LegalCaseManagement = () => {
                         <Bell className="h-5 w-5" />
                         <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                     </button>
-                    <button className="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                    >
                         <LogOut className="h-5 w-5" />
                         <span className="hidden sm:block">Logout</span>
                     </button>
@@ -208,7 +235,7 @@ const LegalCaseManagement = () => {
                 <main className="flex-1 overflow-y-auto p-4 lg:p-6">
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                        {stats.map((stat, index) => (
+                        {dashboardStats.map((stat, index) => (
                             <StatCard key={index} stat={stat} />
                         ))}
                     </div>
@@ -219,12 +246,14 @@ const LegalCaseManagement = () => {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between p-6 border-b border-gray-100">
                                 <h2 className="text-lg font-semibold text-gray-900">Recent Cases</h2>
-                                <a href="/cases" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                <Link to="/cases" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                                     View all
-                                </a>
+                                </Link>
                             </div>
                             <div className="p-6 space-y-4">
-                                {recentCases.length > 0 ? (
+                                {casesLoading ? (
+                                    <div className="text-center py-4">Loading recent cases...</div>
+                                ) : recentCases && recentCases.length > 0 ? (
                                     recentCases.map((case_) => (
                                         <div key={case_.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                             <div className="flex items-center space-x-3">
@@ -235,14 +264,14 @@ const LegalCaseManagement = () => {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                            case_.status === 'Open' ? 'bg-green-100 text-green-800' :
-                                case_.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-gray-100 text-gray-800'
-                        }`}>
-                          {case_.status}
-                        </span>
-                                                <p className="text-xs text-gray-500 mt-1">{case_.date}</p>
+                                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                                                    case_.status === 'OPEN' ? 'bg-green-100 text-green-800' :
+                                                        case_.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                    {case_.status}
+                                                </span>
+                                                <p className="text-xs text-gray-500 mt-1">{case_.createdAt}</p>
                                             </div>
                                         </div>
                                     ))
@@ -250,9 +279,9 @@ const LegalCaseManagement = () => {
                                     <div className="text-center py-8">
                                         <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                         <p className="text-gray-500">No recent cases</p>
-                                        <button className="mt-2 text-blue-600 hover:text-blue-700 font-medium">
+                                        <Link to="/cases" className="mt-2 text-blue-600 hover:text-blue-700 font-medium">
                                             Create your first case
-                                        </button>
+                                        </Link>
                                     </div>
                                 )}
                             </div>
@@ -262,24 +291,26 @@ const LegalCaseManagement = () => {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between p-6 border-b border-gray-100">
                                 <h2 className="text-lg font-semibold text-gray-900">Upcoming Hearings</h2>
-                                <a href="/hearings" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                <Link to="/hearings" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                                     View all
-                                </a>
+                                </Link>
                             </div>
                             <div className="p-6 space-y-4">
-                                {upcomingHearings.length > 0 ? (
+                                {hearingsLoading ? (
+                                    <div className="text-center py-4">Loading upcoming hearings...</div>
+                                ) : upcomingHearings && upcomingHearings.length > 0 ? (
                                     upcomingHearings.map((hearing) => (
                                         <div key={hearing.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                             <div className="flex items-center space-x-3">
                                                 <Gavel className="h-5 w-5 text-gray-500" />
                                                 <div>
                                                     <p className="font-medium text-gray-900">{hearing.case}</p>
-                                                    <p className="text-sm text-gray-500">{hearing.court}</p>
+                                                    <p className="text-sm text-gray-500">{hearing.notes}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm font-medium text-gray-900">{hearing.date}</p>
-                                                <p className="text-xs text-gray-500">{hearing.time}</p>
+                                                <p className="text-xs text-gray-500">{new Date(hearing.date).toLocaleTimeString()}</p>
                                             </div>
                                         </div>
                                     ))
@@ -287,9 +318,9 @@ const LegalCaseManagement = () => {
                                     <div className="text-center py-8">
                                         <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                         <p className="text-gray-500">No upcoming hearings</p>
-                                        <button className="mt-2 text-blue-600 hover:text-blue-700 font-medium">
+                                        <Link to="/hearings" className="mt-2 text-blue-600 hover:text-blue-700 font-medium">
                                             Schedule a hearing
-                                        </button>
+                                        </Link>
                                     </div>
                                 )}
                             </div>
@@ -301,4 +332,4 @@ const LegalCaseManagement = () => {
     );
 };
 
-export default LegalCaseManagement;
+export default Dashboard;
