@@ -49,6 +49,10 @@ public class Case {
     @Builder.Default
     private List<Document> documents = new ArrayList<>();
 
+    @OneToMany(mappedBy = "caseEntity", fetch = FetchType.EAGER)
+    private List<CaseHistory> history = new ArrayList<>();
+
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

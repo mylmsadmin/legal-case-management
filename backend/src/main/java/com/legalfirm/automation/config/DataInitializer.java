@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class DataInitializer {
             CaseRepository caseRepository,
             HearingRepository hearingRepository,
             MessageRepository messageRepository,
+            CaseHistoryRepository caseHistoryRepository,
             PasswordEncoder passwordEncoder) {
         
         return args -> {
@@ -98,7 +101,8 @@ public class DataInitializer {
                     .client(client1)
                     .assignedLawyer(lawyer1)
                     .build();
-            case1 = caseRepository.save(case1);
+             case1 = caseRepository.save(case1);
+
 
             Case case2 = Case.builder()
                     .title("XYZ Industries - Patent Infringement")
@@ -149,6 +153,59 @@ public class DataInitializer {
                     .build();
             hearingRepository.save(hearing3);
 
+
+            CaseHistory caseHistory = CaseHistory.builder()
+                    .action("Case Created")
+                    .caseEntity(case1)
+                    .timestamp(LocalDateTime.now())
+                    .performedBy(admin)
+                    .description("Initial case creation by admin")// Will be set when a case is created
+                    .oldValue("Old Value Example")
+                    .newValue("New Value Example")
+                    .category("Creation")
+                    .build();
+            caseHistory = caseHistoryRepository.save(caseHistory);
+
+
+
+            CaseHistory caseHistory2 = CaseHistory.builder()
+                    .action("Case Created")
+                    .caseEntity(case1)
+                    .timestamp(LocalDateTime.now())
+                    .performedBy(admin)
+                    .description("Initial case creation by admin")
+                    .oldValue("Old Value Example")
+                    .newValue("New Value Example")
+                    .category("Creation")
+                    .build();
+
+            caseHistoryRepository.save(caseHistory2);
+
+
+            CaseHistory caseHistory3 = CaseHistory.builder()
+                    .action("Case Created")
+                    .caseEntity(case2)
+                    .timestamp(LocalDateTime.now())
+                    .performedBy(admin)
+                    .description("Initial case creation by admin")
+                    .oldValue("Old Value Example")
+                    .newValue("New Value Example")
+                    .category("Creation")
+                    .build();
+            caseHistoryRepository.save(caseHistory3);
+
+            CaseHistory caseHistory4 = CaseHistory.builder()
+                    .action("Case Created")
+                    .caseEntity(case2)
+                    .timestamp(LocalDateTime.now())
+                    .performedBy(admin)
+                    .description("Initial case creation by admin")
+                    .oldValue("Old Value Example")
+                    .newValue("New Value Example")
+                    .category("Creation")
+                    .build();
+            caseHistoryRepository.save(caseHistory4);
+
             // Create Messages
             Message message1 = Message.builder()
                     .sender(lawyer1)
@@ -165,6 +222,23 @@ public class DataInitializer {
                     .isRead(false)
                     .build();
             messageRepository.save(message2);
+
+            List<CaseHistory> case1History = new ArrayList<>();
+            case1History.add(caseHistory);
+            case1History.add(caseHistory2);
+
+
+            List<CaseHistory> case2History = new ArrayList<>();
+            case2History.add(caseHistory3);
+            case2History.add(caseHistory4);
+
+
+            case1.setHistory(case1History);
+            caseRepository.save(case1);
+
+            case2.setHistory(case2History);
+            caseRepository.save(case2);
+
 
             System.out.println("========================================");
             System.out.println("Sample data initialized successfully!");

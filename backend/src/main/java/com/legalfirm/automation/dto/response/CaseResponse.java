@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -24,4 +25,5 @@ public class CaseResponse {
     private Integer totalDocuments;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<CaseHistoryResponse> recentHistory;
 }

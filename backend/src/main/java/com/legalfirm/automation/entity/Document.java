@@ -18,6 +18,7 @@ import java.util.UUID;
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "document_id")
     private UUID id;
 
     @Column(nullable = false)

@@ -18,6 +18,7 @@ import java.util.UUID;
 public class Hearing {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "hearing_id")
     private UUID id;
 
     @Column(nullable = false)
