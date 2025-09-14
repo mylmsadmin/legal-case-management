@@ -1,10 +1,12 @@
 package com.legalfirm.automation.dto.response;
 
 import com.legalfirm.automation.enums.CaseStatus;
+import com.legalfirm.automation.dto.request.CaseStatistics;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,11 +25,11 @@ public class CaseDetailResponse {
     private UserResponse assignedLawyer;
     private List<HearingResponse> hearings;
     private List<DocumentResponse> documents;
-    private List<CaseNoteResponse> notes;
-    private List<CaseActivityResponse> activities;
+    private List<CaseHistoryResponse> recentHistory;
     private Integer totalHearings;
     private Integer totalDocuments;
-    private Integer totalNotes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime nextHearingDate;
+    private CaseStatistics statistics;
 }

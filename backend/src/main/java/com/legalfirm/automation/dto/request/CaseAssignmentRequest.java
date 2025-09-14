@@ -16,5 +16,5 @@ public class CaseAssignmentRequest {
     @NotNull(message = "Lawyer ID is required")
     private UUID lawyerId;
     
-    private String notes;
+    private String assignmentNotes;
 }

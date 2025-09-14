@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CaseStatusUpdateRequest {
-    @NotNull(message = "Case status is required")
+    @NotNull(message = "Status is required")
     private CaseStatus status;
     
     private String reason;
