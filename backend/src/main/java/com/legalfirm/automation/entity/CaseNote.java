@@ -35,6 +35,9 @@ public class CaseNote {
     @Builder.Default
     private Boolean isPrivate = false;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String title;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

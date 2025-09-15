@@ -410,7 +410,7 @@ public class CaseService {
     private CaseStatistics buildCaseStatistics(Case caseEntity, List<Document> documents, List<Hearing> hearings) {
         long daysOpen = ChronoUnit.DAYS.between(caseEntity.getCreatedAt(), LocalDateTime.now());
         long upcomingHearings = hearings.stream()
-                .filter(h -> h.getDate().isAfter(LocalDateTime.now()))
+                .filter(h -> h != null && h.getDate().isAfter(LocalDateTime.now()))
                 .count();
         long completedHearings = hearings.size() - upcomingHearings;
 

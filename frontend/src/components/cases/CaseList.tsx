@@ -164,18 +164,18 @@ const CaseList: React.FC = () => {
                                                     </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button
-                                                    onClick={() => alert(`View case ${case_.id}`)}
+                                                <Link
+                                                    to={`/cases/${case_.id}`}
                                                     className="text-indigo-600 hover:text-indigo-900 mr-4"
                                                 >
                                                     View
-                                                </button>
-                                                <button
-                                                    onClick={() => alert(`Edit case ${case_.id}`)}
+                                                </Link>
+                                                <Link
+                                                    to={`/cases/${case_.id}/edit`}
                                                     className="text-indigo-600 hover:text-indigo-900"
                                                 >
                                                     Edit
-                                                </button>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))}

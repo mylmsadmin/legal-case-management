@@ -27,7 +27,7 @@ public class Document {
     @Column(nullable = false)
     private String type;
 
-    @Column(name = "file_path", nullable = false)
+    @Column(name = "file_path")
     private String filePath;
 
     @Column(name = "file_size")

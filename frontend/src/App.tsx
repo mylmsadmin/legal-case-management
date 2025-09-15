@@ -7,6 +7,9 @@ import CaseList from './components/cases/CaseList';
 import ClientList from './components/clients/ClientList';
 import MessageCenter from './components/messages/MessageCenter';
 import Navbar from './components/layout/Navbar';
+import ViewCase from './components/cases/ViewCase';
+import EditCase from './components/cases/EditCase';
+
 
 const queryClient = new QueryClient();
 
@@ -56,6 +59,23 @@ const App: React.FC = () => {
                                 </ProtectedRoute>
                             }
                         />
+                        <Route path="/cases/:id"
+                            element={
+                        <ProtectedRoute>
+                        <ViewCase />
+                       </ProtectedRoute>
+                            }
+                               />
+
+                        <Route path="/cases/:id/edit"
+                               element={
+                                   <ProtectedRoute>
+                                       <EditCase />
+                                   </ProtectedRoute>
+                               }
+                        />
+
+
                         <Route
                             path="/clients"
                             element={
